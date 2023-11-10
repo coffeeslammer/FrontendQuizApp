@@ -16,6 +16,7 @@
 body,
 h1,
 h2,
+h3,
 p,
 li,
 ul {
@@ -33,6 +34,7 @@ body {
 header {
     margin-top: 1rem;
     margin-right: 1rem;
+    margin-bottom: 2rem;
     display: flex;
     justify-content: space-between;
 }
@@ -53,11 +55,23 @@ h1 {
     margin-bottom: 1rem;
 }
 
+.question-number {
+    margin-top: 2rem;
+    color: var(--lightgrey);
+}
+
+.the-question {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+}
+
 h1 span {
     font-weight: 600;
 }
 
-p {
+.intro p {
     font-weight: 300;
     color: var(--lightergrey);
     margin-bottom: 3rem;
@@ -69,6 +83,15 @@ button {
     border: none;
     color: white;
 
+}
+
+.btn-answer {
+    background-color: var(--purple);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    font-weight: 700;
 }
 
 .progress-shell {
