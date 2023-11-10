@@ -4,21 +4,25 @@ const base = document.querySelector(".html-container");
 const intro = document.querySelector(".intro");
 const quiz = document.querySelector(".quiz");
 const headerLabel = document.querySelector(".header-left");
+const questionNumber = document.querySelector(".question-number");
+const theQuestion = document.querySelector(".the-question");
+const btnAnswer = document.querySelector(".btn-answer");
 
-let theData;
+let theData; //I'm sure there is a cleaner way to do this
+let numOfQuestions = 0;
+let questionCount = 1;
+//TODO I may set this as an object. I want to treat it like an ENUM
+//just for better readability in choosing quiz choice
+const choice = ["HTML", "CSS", "Javascript", "Accessibility"];
 
-function fetchData() {
-  fetch("../data.json")
-    .then((res) => res.json())
-    .then((data) => {
-      theData = data;
-      console.log(data.quizzes[0].title);
-      console.log(data.quizzes[0]);
-      init(data);
-      setListener();
-    });
+async function anotherFetch() {
+  const res = await fetch("../data.json");
+  theData = await res.json();
+  init(theData);
+  setListener();
+  console.log(theData);
 }
-fetchData();
+anotherFetch();
 
 function init(data) {
   data.quizzes.forEach((e) => {
@@ -43,28 +47,26 @@ function evaluateBtn(e) {
   if (base.innerHTML !== "") {
     base.innerHTML = "";
   }
+  //TODO may add these three lines to a separate function
   intro.classList.add("hidden");
   quiz.classList.remove("hidden");
+  btnAnswer.classList.remove("hidden");
 
   switch (e.target.textContent) {
     case "HTML": {
-      HTMLSection();
-
+      renderQuizHeader(0);
       break;
     }
     case "CSS": {
-      CSSSection();
-
+      renderQuizHeader(1);
       break;
     }
     case "JavaScript": {
-      JSSection();
-
+      renderQuizHeader(2);
       break;
     }
     case "Accessibility": {
-      AccSection();
-
+      renderQuizHeader(3);
       break;
     }
   }
@@ -76,36 +78,30 @@ function setListener() {
     e.addEventListener("click", evaluateBtn);
   });
 }
-function HTMLSection() {
-  console.log(theData);
+function renderQuizHeader(section) {
   const img = document.createElement("img");
-  img.classList.add(`img-${theData.quizzes[0].title}`);
-  img.src = theData.quizzes[0].icon;
+
+  img.classList.add(`img-${theData.quizzes[section].title}`);
+  img.src = theData.quizzes[section].icon;
+
   const h3 = document.createElement("h3");
-  h3.textContent = theData.quizzes[0].title;
+  h3.textContent = theData.quizzes[section].title;
+
   headerLabel.append(img);
   headerLabel.appendChild(h3);
-  renderQuiz(theData.quizzes, 0);
-  console.log("So far so good HTML");
-}
-function CSSSection() {
-  renderQuiz(theData.quizzes, 1);
-  console.log("So far so good css");
-}
-function JSSection() {
-  renderQuiz(theData.quizzes, 2);
-  console.log("So far so good JavaScript");
-}
-function AccSection() {
-  renderQuiz(theData.quizzes, 3);
-  console.log("So far so good Accessibility");
-}
 
-function renderQuiz(data, i) {
+  renderQuiz(section);
+}
+//FIXME this functions needs more work and clean up
+function renderQuiz(i) {
   //index 65 is for ascii A to iterate the alphabet
   let index = 65;
+  //FIXME this line is hardcoded dummy code
+  numOfQuestions = theData.quizzes[i].questions.length;
+  questionNumber.textContent = `Question ${questionCount} of ${numOfQuestions}`;
+  theQuestion.textContent = theData.quizzes[i].questions[0].question;
   //TODO need a way to get next question
-  data[i].questions[0].options.forEach((e) => {
+  theData.quizzes[i].questions[0].options.forEach((e) => {
     const btn = document.createElement("button");
     const li = document.createElement("li");
     const div = document.createElement("div");
