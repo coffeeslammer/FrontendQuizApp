@@ -56,29 +56,21 @@ function runSelection(e) {
   //maybe change its name and use it to store more info like which subject, which question, correct, incorrect, etc...
   switch (e.target.textContent) {
     case "HTML": {
-      currentQuiz.answer = theData.quizzes[choice.HTML].questions[currentQuiz.index].answer;
       renderQuizHeader(choice.HTML);
       renderQuiz(currentQuiz.index);
       break;
     }
     case "CSS": {
-      currentQuiz.answer = theData.quizzes[choice.CSS].questions[currentQuiz.index].answer;
-
       renderQuizHeader(choice.CSS);
       renderQuiz(currentQuiz.index);
       break;
     }
     case "JavaScript": {
-      currentQuiz.answer = theData.quizzes[choice.Javascript].questions[currentQuiz.index].answer;
-
       renderQuizHeader(choice.Javascript);
       renderQuiz(currentQuiz.index);
       break;
     }
     case "Accessibility": {
-      currentQuiz.answer =
-        theData.quizzes[choice.Accessibility].questions[currentQuiz.index].answer;
-
       renderQuizHeader(choice.Accessibility);
       renderQuiz(currentQuiz.index);
       break;
@@ -139,7 +131,6 @@ function createQuizButton(e, ascii, ix) {
   } else {
     div.classList.add("square");
     div.textContent = String.fromCharCode(ascii);
-    // ascii++;
     btn.textContent = e;
     btn.classList.add("choices");
     btn.setAttribute("index", ix);
@@ -148,7 +139,6 @@ function createQuizButton(e, ascii, ix) {
   baseUL.append(li);
   li.append(btn);
   btn.append(div);
-  // btn.append(p);
 }
 function clearActive(e) {
   if (e.currentTarget.classList.contains("active")) {
@@ -173,20 +163,36 @@ function setBtnChoiceListener() {
     btn.addEventListener("click", evaluateChoice);
   });
 }
+function insertAnswerIcon(answerButton, answer) {
+  const imgPass = document.createElement("img");
+  if (answer) {
+    imgPass.src = "../images/icon-correct.svg";
+    answerButton.append(imgPass);
+  } else {
+    imgPass.src = "../images/icon-incorrect.svg";
+    answerButton.append(imgPass);
+  }
+}
 function checkAnswer() {
   console.log("checking answer");
   document.querySelectorAll(".btn-container li button").forEach((b) => {
-    console.log(b);
-
+    if (b.getAttribute("index") == currentQuiz.location) {
+      insertAnswerIcon(b, true);
+    }
     if (b.classList.contains("active")) {
       if (b.getAttribute("index") == currentQuiz.location) {
         b.classList.remove("active");
         b.classList.add("correct");
         console.log("Yay");
-        score++;
+        score++; //TODO decide how to handel this. may put in the object I'm using
       } else {
+        //this is for wrong answer code
+        insertAnswerIcon(b, false);
+        b.classList.remove("active");
+        b.classList.add("wrong");
       }
     }
+    console.log(b);
   });
 }
 btnAnswer.addEventListener("click", checkAnswer);
