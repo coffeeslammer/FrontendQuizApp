@@ -23,9 +23,6 @@ const currentQuiz = {
   questionCount: 1,
   numOfQuestions: 0,
 };
-//TODO I may set this as an object. I want to treat it like an ENUM
-//just for better readability in choosing quiz choice
-// const choice = { HTML: 0, CSS: 1, Javascript: 2, Accessibility: 3 };
 
 async function fetchJson() {
   const res = await fetch("../data.json");
@@ -44,34 +41,34 @@ function init(data) {
 }
 
 function runSelection(e) {
-  if (baseUL.innerHTML !== "") {
-    baseUL.innerHTML = "";
-  }
   //TODO may add these three lines to a separate function
   intro.classList.add("hidden");
   quiz.classList.remove("hidden");
   btnAnswer.classList.remove("hidden");
+
   const choice = { HTML: 0, CSS: 1, Javascript: 2, Accessibility: 3 };
 
-  //FIXME I think I need to add which index the answer is located at in the currentAnswer object
-  //maybe change its name and use it to store more info like which subject, which question, correct, incorrect, etc...
   switch (e.target.textContent) {
     case "HTML": {
+      currentQuiz.numOfQuestions = theData.quizzes[currentQuiz.index].questions.length;
       renderQuizHeader(choice.HTML);
       renderQuiz(currentQuiz.index);
       break;
     }
     case "CSS": {
+      currentQuiz.numOfQuestions = theData.quizzes[currentQuiz.index].questions.length;
       renderQuizHeader(choice.CSS);
       renderQuiz(currentQuiz.index);
       break;
     }
     case "JavaScript": {
+      currentQuiz.numOfQuestions = theData.quizzes[currentQuiz.index].questions.length;
       renderQuizHeader(choice.Javascript);
       renderQuiz(currentQuiz.index);
       break;
     }
     case "Accessibility": {
+      currentQuiz.numOfQuestions = theData.quizzes[currentQuiz.index].questions.length;
       renderQuizHeader(choice.Accessibility);
       renderQuiz(currentQuiz.index);
       break;
@@ -97,26 +94,32 @@ function renderQuizHeader(section) {
   headerLabel.append(img);
   headerLabel.appendChild(h3);
 }
-
+function clearUL() {
+  if (baseUL.innerHTML !== "") {
+    baseUL.innerHTML = "";
+  }
+}
 function renderQuiz(i) {
-  //index 65 is for ascii A to iterate the alphabet
-  let asciiIndex = 65;
+  clearUL();
 
-  currentQuiz.numOfQuestions = theData.quizzes[i].questions.length;
+  let asciiIndex = 65;
 
   questionNumOnText.textContent = `Question ${currentQuiz.questionCount} of ${currentQuiz.numOfQuestions}`;
 
   theQuestion.textContent = theData.quizzes[i].questions[currentQuiz.nextQuestion].question;
 
-  currentQuiz.answer = theData.quizzes[i].questions[currentQuiz.index].answer;
+  currentQuiz.answer = theData.quizzes[i].questions[currentQuiz.nextQuestion].answer;
 
   theData.quizzes[i].questions[currentQuiz.nextQuestion].options.forEach((e, ix) => {
-    if (currentQuiz.answer === e) currentQuiz.location = ix;
+    if (currentQuiz.answer === e) {
+      currentQuiz.location = ix;
+    }
     createQuizButton(e, asciiIndex, ix);
     asciiIndex++;
   });
-  console.log(currentQuiz.location);
-  setBtnChoiceListener();
+
+  setBtnChoiceListener(); //FIXME I think this keeps getting called and reran
+  //I think I need a flag to run only once
 }
 function createQuizButton(e, ascii, ix) {
   const btn = document.createElement("button");
@@ -142,8 +145,23 @@ function createQuizButton(e, ascii, ix) {
   btn.append(div);
 }
 function clearActive(e) {
-  if (e.currentTarget.classList.contains("active")) {
-    e.currentTarget.classList.remove("active");
+  //FIXME I need to build a safer for loop later
+  console.log(
+    e.currentTarget.parentElement.parentElement.children[0].children[0].classList.contains(
+      "subject"
+    )
+  );
+  //BUG get a better count then the magic number 4
+  for (let i = 0; i < 4; i++) {
+    if (
+      e.currentTarget.parentElement.parentElement.children[i].children[0].classList.contains(
+        "active"
+      )
+    ) {
+      e.currentTarget.parentElement.parentElement.children[i].children[0].classList.remove(
+        "active"
+      );
+    }
   }
 }
 function evaluateChoice(e) {
@@ -195,16 +213,56 @@ function checkAnswer() {
       baseUL.children[activeCheck.index].children[0].classList.contains("active") &&
       button[activeCheck.index].getAttribute("index") == currentQuiz.location
     ) {
-      console.log("do some stuff here");
       insertAnswerIcon(button[activeCheck.index], "pass");
       button[activeCheck.index].classList.add("correct");
+      currentQuiz.correct++;
     } else {
       insertAnswerIcon(button[activeCheck.index], "fail");
       insertAnswerIcon(button[currentQuiz.location], "pass");
       button[activeCheck.index].classList.add("wrong");
     }
+    console.log("this is where we move on");
+    btnAnswer.textContent = "Next Question";
+    nextQuestion();
   }
   console.log(baseUL.childElementCount);
   //TODO get the next question button working here
 }
-btnAnswer.addEventListener("click", checkAnswer);
+function nextQuestion() {
+  // index: 0,
+  //   answer: "unknown",
+  //   location: 0,
+  //   correct: 0,
+  //   nextQuestion: 0,
+  //   questionCount: 1,
+  currentQuiz.nextQuestion++;
+  currentQuiz.questionCount++;
+  // currentQuiz.index++;
+  //   numOfQuestions: 0,
+  // if (currentQuiz.nextQuestion === currentQuiz.questionCount) {
+  //   TODO; //game is done show final screen
+  //   showFinalScreen();
+  // }
+}
+function showFinalScreen() {
+  const completedQuizScreen = document.querySelector(".completed");
+  const completedImg = document.querySelector(".completed div img");
+  const sectionTitle = document.querySelector(".section-title");
+  console.log(completedImg);
+  clearUL();
+  btnAnswer.textContent = "Play Again";
+  completedImg.src = theData.quizzes[currentQuiz.index].icon;
+  sectionTitle.textContent = theData.quizzes[currentQuiz.index].title;
+  document.querySelector(".completed h2").textContent = currentQuiz.correct;
+  document.querySelector(".completed .p").textContent = `out of ${currentQuiz.numOfQuestions}`;
+}
+btnAnswer.addEventListener("click", () => {
+  if (currentQuiz.numOfQuestions === currentQuiz.nextQuestion) {
+    showFinalScreen();
+  } else if (btnAnswer.textContent === "Next Question") {
+    btnAnswer.textContent = "Submit Answer";
+    renderQuiz(currentQuiz.index);
+  } else {
+    checkAnswer();
+  }
+});
