@@ -7,6 +7,7 @@ const headerLabel = document.querySelector(".header-left");
 const questionNumOnText = document.querySelector(".question-on-text");
 const theQuestion = document.querySelector(".the-question");
 const btnAnswer = document.querySelector(".btn-answer");
+const subjectContainer = document.querySelector(".subjects-container");
 
 let theData; //I'm sure there is a cleaner way to do this
 // let numOfQuestions = 0;
@@ -165,34 +166,45 @@ function setBtnChoiceListener() {
 }
 function insertAnswerIcon(answerButton, answer) {
   const imgPass = document.createElement("img");
-  if (answer) {
+  if (answer === "pass") {
     imgPass.src = "../images/icon-correct.svg";
     answerButton.append(imgPass);
+  } else if (answer === "fail") {
   } else {
     imgPass.src = "../images/icon-incorrect.svg";
+    answerButton.classList.add("error");
     answerButton.append(imgPass);
   }
 }
 function checkAnswer() {
-  console.log("checking answer");
-  document.querySelectorAll(".btn-container li button").forEach((b) => {
-    if (b.getAttribute("index") == currentQuiz.location) {
-      insertAnswerIcon(b, true);
-    }
+  const button = document.querySelectorAll(".btn-container li button");
+  const activeCheck = { index: -1 };
+
+  button.forEach((b, index) => {
     if (b.classList.contains("active")) {
-      if (b.getAttribute("index") == currentQuiz.location) {
-        b.classList.remove("active");
-        b.classList.add("correct");
-        console.log("Yay");
-        score++; //TODO decide how to handel this. may put in the object I'm using
-      } else {
-        //this is for wrong answer code
-        insertAnswerIcon(b, false);
-        b.classList.remove("active");
-        b.classList.add("wrong");
-      }
+      activeCheck.index = index;
     }
-    console.log(b);
   });
+  if (activeCheck.index == -1) {
+    insertAnswerIcon(subjectContainer, "error");
+  } else {
+    if (subjectContainer.contains(document.querySelector(".error"))) {
+      subjectContainer.lastElementChild.remove();
+    }
+    if (
+      baseUL.children[activeCheck.index].children[0].classList.contains("active") &&
+      button[activeCheck.index].getAttribute("index") == currentQuiz.location
+    ) {
+      console.log("do some stuff here");
+      insertAnswerIcon(button[activeCheck.index], "pass");
+      button[activeCheck.index].classList.add("correct");
+    } else {
+      insertAnswerIcon(button[activeCheck.index], "fail");
+      insertAnswerIcon(button[currentQuiz.location], "pass");
+      button[activeCheck.index].classList.add("wrong");
+    }
+  }
+  console.log(baseUL.childElementCount);
+  //TODO get the next question button working here
 }
 btnAnswer.addEventListener("click", checkAnswer);
