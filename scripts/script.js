@@ -1,6 +1,6 @@
 "use strict";
 
-const baseUL = document.querySelector(".btn-container");
+const baseUL = document.querySelector(".ul-btn-container");
 const intro = document.querySelector(".intro");
 const quiz = document.querySelector(".quiz");
 const headerLabel = document.querySelector(".header-left");
@@ -10,10 +10,8 @@ const btnAnswer = document.querySelector(".btn-answer");
 const subjectContainer = document.querySelector(".subjects-container");
 
 let theData; //I'm sure there is a cleaner way to do this
-// let numOfQuestions = 0;
-// let questionCount = 1;
-// let nextQuestion = 0;
 let score = 0;
+
 const currentQuiz = {
   index: 0,
   answer: "unknown",
@@ -32,7 +30,45 @@ async function fetchJson() {
   console.log(theData);
 }
 fetchJson();
+// const title = { html: "html", css: "css", javascript: "Javascript" };
+// const iconsf = { HTML: "icon-html.svg", CSS: "icon-css.svg", Javascript: "icon-js.svg" };
+// for (const t in iconsf) {
+//   //   console.log(iconsf[t]);
+//   let btn = new Button().startScreen(iconsf[t], t, "icon-error.svg");
+// }
+class Button {
+  base = document.querySelector("baseUL");
+  button = document.createElement(".selection");
+  h2 = document.createElement("h2");
+  icons = document.createElement("img");
+  error = document.createElement("img");
+  correct = document.createElement("img");
+  divStart = document.createElement("div");
+  divEnd = document.createElement("div");
 
+  startScreen(text) {
+    // this.error.src = end;
+    // this.error.classList.add("adjust");
+    this.button.classList.add("selection");
+    this.icons.src = text.icon;
+    this.h2.textContent = text.text;
+    this.base.append(this.button);
+    this.divStart.append(this.icons);
+    this.button.append(this.divStart);
+    // thi.divEnd.append(this.error);
+    this.button.append(this.h2);
+    this.button.append(this.divEnd);
+  }
+  questions() {}
+  // const img = document.createElement("img");
+  // img.classList.add(`img-${e.title}`);
+  // btn.textContent = e.title;
+  // img.src = e.icon;
+  // div.append(img);
+  // const btn = document.createElement("button");
+  // const li = document.createElement("li");
+  // const div = document.createElement("div");
+}
 function init(data) {
   data.quizzes.forEach((e) => {
     //the -1 is to trigger the if statement.
@@ -114,24 +150,32 @@ function renderQuiz(i) {
     if (currentQuiz.answer === e) {
       currentQuiz.location = ix;
     }
-    createQuizButton(e, asciiIndex, ix);
+    // createQuizButton(e, asciiIndex, ix);
+    const btnStart = new Button().startScreen(e);
     asciiIndex++;
   });
 
-  setBtnChoiceListener(); //FIXME I think this keeps getting called and reran
-  //I think I need a flag to run only once
+  setBtnChoiceListener();
+}
+function createButtonIcon(e, btn, div) {
+  const img = document.createElement("img");
+  img.classList.add(`img-${e.title}`);
+  btn.textContent = e.title;
+  img.src = e.icon;
+  div.append(img);
 }
 function createQuizButton(e, ascii, ix) {
   const btn = document.createElement("button");
   const li = document.createElement("li");
   const div = document.createElement("div");
-
+  //FIXME I need to reevaluate this section. I'm not sure I like how it is being rendered
   if (ascii === -1) {
-    const img = document.createElement("img");
-    img.classList.add(`img-${e.title}`);
-    btn.textContent = e.title;
-    img.src = e.icon;
-    div.append(img);
+    createButtonIcon(e, btn, div);
+    // const img = document.createElement("img");
+    // img.classList.add(`img-${e.title}`);
+    // btn.textContent = e.title;
+    // img.src = e.icon;
+    // div.append(img);
   } else {
     div.classList.add("square");
     div.textContent = String.fromCharCode(ascii);
@@ -145,14 +189,8 @@ function createQuizButton(e, ascii, ix) {
   btn.append(div);
 }
 function clearActive(e) {
-  //FIXME I need to build a safer for loop later
-  console.log(
-    e.currentTarget.parentElement.parentElement.children[0].children[0].classList.contains(
-      "subject"
-    )
-  );
-  //BUG get a better count then the magic number 4
-  for (let i = 0; i < 4; i++) {
+  let len = e.currentTarget.parentElement.parentElement.childElementCount;
+  for (let i = 0; i < len; i++) {
     if (
       e.currentTarget.parentElement.parentElement.children[i].children[0].classList.contains(
         "active"
@@ -169,7 +207,7 @@ function evaluateChoice(e) {
   e.currentTarget.classList.add("active");
 
   console.log(e.currentTarget.textContent);
-
+  //TODO I am not sure what this is doing
   if (e.currentTarget.textContent === currentQuiz.answer) {
     console.log("you get a cookie");
   }
@@ -228,30 +266,20 @@ function checkAnswer() {
   console.log(baseUL.childElementCount);
   //TODO get the next question button working here
 }
+//FIXME either change name or make this function more useful
 function nextQuestion() {
-  // index: 0,
-  //   answer: "unknown",
-  //   location: 0,
-  //   correct: 0,
-  //   nextQuestion: 0,
-  //   questionCount: 1,
   currentQuiz.nextQuestion++;
   currentQuiz.questionCount++;
-  // currentQuiz.index++;
-  //   numOfQuestions: 0,
-  // if (currentQuiz.nextQuestion === currentQuiz.questionCount) {
-  //   TODO; //game is done show final screen
-  //   showFinalScreen();
-  // }
 }
 function showFinalScreen() {
   const completedQuizScreen = document.querySelector(".completed");
   const completedImg = document.querySelector(".completed div img");
   const sectionTitle = document.querySelector(".section-title");
-  console.log(completedImg);
+
   clearUL();
   btnAnswer.textContent = "Play Again";
   completedImg.src = theData.quizzes[currentQuiz.index].icon;
+  completedImg.classList.add(`img-${theData.quizzes[currentQuiz.index].title}`);
   sectionTitle.textContent = theData.quizzes[currentQuiz.index].title;
   document.querySelector(".completed h2").textContent = currentQuiz.correct;
   document.querySelector(".completed .p").textContent = `out of ${currentQuiz.numOfQuestions}`;
